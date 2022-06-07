@@ -54,7 +54,6 @@ namespace VCL::MassSpring
     {
         Vec3f x_ij = this->nodes[0]->position - this->nodes[1]->position;
         Mat3f Mat_I = Mat3f::Identity();
-        // Mat_I << 1, 0, 0, 0, 1, 0, 0, 0, 1;
         hessian = (this->k * x_ij * x_ij.transpose()) / x_ij.norm();
         hessian += this->k * (1 - this->init_length / x_ij.norm()) * (Mat_I - x_ij * x_ij.transpose());
         hessian *= -1.0;
