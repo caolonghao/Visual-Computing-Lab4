@@ -62,6 +62,7 @@ namespace VCL
                 std::vector<Edge*> edges;
                 float dt = 5e-3f;
                 Vec3f gravity = Vec3f(0.0f, -9.8f, 0.0f);
+                // TODO: test both implicity and explicity
                 IntegrationMode integration_mode = IntegrationMode::ImplicitEuler;
 
             protected:

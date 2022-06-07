@@ -43,13 +43,21 @@ namespace VCL::MassSpring
     /*homework: compute the force on the single spring*/
     void Edge::compute_spring_force(Vec3f& force) 
     {
-        
+        float length_now = this->get_length();
+        // 根据下面的解释，node1是+，因此计算node1收到的力
+        force = (this->nodes[1]->position - this->nodes[0]->position).normalized();
+        force *= (this->init_length - length_now) * this->k;
     }
 
     /* homework: compute the single spring on the Hessian matrix: \partial f^i / \partial x^i*/
     void Edge::compute_hessian_matrix(Mat3f& hessian) 
     {
-        
+        Vec3f x_ij = this->nodes[0]->position - this->nodes[1]->position;
+        Mat3f Mat_I = Mat3f::Identity();
+        // Mat_I << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+        hessian = (this->k * x_ij * x_ij.transpose()) / x_ij.norm();
+        hessian += this->k * (1 - this->init_length / x_ij.norm()) * (Mat_I - x_ij * x_ij.transpose());
+        hessian *= -1.0;
     }
 
     DynamicSystem::DynamicSystem(Framebuffer* framebuffer_, Camera* camera_) :
@@ -203,7 +211,9 @@ namespace VCL::MassSpring
             /* homework: explicit euler (update acceleration, velocity, position) */
             if (!nodes[i]->is_fixed)
             {
-
+                Vec3f acc = nodes[i]->force / nodes[i]->mass;
+                nodes[i]->velocity += acc * dt;
+                nodes[i]->position += nodes[i]->velocity * dt;
             }
         }
     }
@@ -247,9 +257,11 @@ namespace VCL::MassSpring
         SpMatf Hess(this->num_nodes() * 3, this->num_nodes() * 3);
 
         for (int i = 0; i < this->num_nodes(); i++) {
+            // 大 Hess 保存了 F 关于 x 的Hessian矩阵
             for (int row = 0; row < 3; row++)
                 matrix_elements.push_back(Tripletf(3 * i + row, 3 * i + row, nodes[i]->mass / dt / dt));
             Vec3f y = nodes[i]->position + dt * nodes[i]->velocity + dt * dt * gravity;
+            // F 关于 x 的导数
             if(!nodes[i]->is_fixed)deriv.segment<3>(3 * i) = (nodes[i]->position - y) * nodes[i]->mass / dt / dt - nodes[i]->force;
         }
         Hess.setFromTriplets(matrix_elements.begin(), matrix_elements.end());
@@ -258,7 +270,10 @@ namespace VCL::MassSpring
 
         /* homework: read the code of implicit euler method in this function, and update the system state*/
         for (int i = 0; i < this->num_nodes(); i++) {
-
+            Vec3f delta_x_i = delta_x.segment<3>(3 * i);
+            nodes[i]->position += delta_x_i;
+            // Vec3f pre_velocity = nodes[i]->velocity;
+            nodes[i]->velocity = delta_x_i / dt;
         }
 
     }
