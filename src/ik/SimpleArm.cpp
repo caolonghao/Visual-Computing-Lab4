@@ -64,11 +64,9 @@ namespace VCL::IK
     void SimpleArm::inverse_kinematics(const Vec3f& end_position)
     {
         // You can choose one of inverse kinematics to implement
-        // this->ccd_ik(end_position, 100, 1e-4);
-        // printf("IKType = %d\n", this->ik_type);
         if (this->ik_type == IKType::CCD)
         {
-            this->ccd_ik(end_position, 100, 1e-4);
+            this->ccd_ik(end_position, 500, 1e-4);
         }
         else if (this->ik_type == IKType::FABR)
         {
@@ -78,21 +76,18 @@ namespace VCL::IK
 
     void SimpleArm::ccd_ik(const Vec3f& end_position, int maxCCDIKIteration, float eps)
     {
-        // printf("+1s\n");
-        // system("");
         // Implement CCD IK here
         this->forward_kinematics(0);
         for(int CCDIKIteration = 0; CCDIKIteration < maxCCDIKIteration && (end_effector_pos() - end_position).norm() > eps; CCDIKIteration++)
         {
-            // puts("+1s");
             for (int i = this->num_joints() - 2; i >= 0; i--)
             {
                 // homework: create rotation of i-th joint
                 this->forward_kinematics(i);
                 Vec3f chain_top_point = joint_position[this->num_joints() - 1];
                 Vec3f link_root = joint_position[i];
-                Vec3f root_to_end = (end_position - link_root);
-                Vec3f root_to_top = (chain_top_point - link_root);
+                Vec3f root_to_end = (end_position - link_root).normalized();
+                Vec3f root_to_top = (chain_top_point - link_root).normalized();
 
 
             /*  // Simple Rotation 
@@ -102,14 +97,14 @@ namespace VCL::IK
                 float s = 1.0 / sqrt(k + k);
                 Quatf result(k * s, s * rotation_axis(0), s * rotation_axis(1), s * rotation_axis(2));
                 // 后施加新的 result 旋转，换序问题要考虑
-                joint_rotation[i] = result * joint_rotation[i];
+                joint_rotation[i] = joint_rotation[i] * result;
             */
                 
                 // More Robust rotation
                 Vec3f w;
                 float norm_root_end = sqrt(root_to_end.dot(root_to_end) * root_to_top.dot(root_to_top));
                 float real_part = norm_root_end + root_to_end.dot(root_to_top);
-                if (real_part < 1.e-6f * norm_root_end){
+                if (real_part < 1.e-6f * norm_root_end) {
                     real_part = 0.0f;
                     w = abs(root_to_top(0)) > abs(root_to_top(2)) ? Vec3f(-root_to_top(1), root_to_top(0), 0.f)
                                                                   : Vec3f(0.f, -root_to_top(2), root_to_top(1));
@@ -118,7 +113,7 @@ namespace VCL::IK
                     w = root_to_top.cross(root_to_end);
                 }
                 Quatf result(real_part, w(0), w(1), w(2));
-                joint_rotation[i] = result.normalized() * joint_rotation[i];
+                joint_rotation[i] = joint_rotation[i] * result.normalized();
             }
         }
         this->forward_kinematics(0);
@@ -126,7 +121,6 @@ namespace VCL::IK
 
     void SimpleArm::fabr_ik(const Vec3f& end_position, int maxFABRIKIteration, float eps)
     {
-        // printf("+2s\n");
         // Implement fabr ik here
         this->forward_kinematics(0);
         int n_joints = this->num_joints();
@@ -139,14 +133,21 @@ namespace VCL::IK
             for (int i = n_joints - 2; i >= 0; i--)
             {
                 // homework: compute the positions in backward processing
+                Vec3f dir = (joint_position[i] - next_position).normalized();
+                next_position = next_position + dir * joint_offset_len[i];
+                backward_positions[i] = next_position;
             }
 
             // forward update
             Vec3f now_position = this->joint_position[0];
             forward_positions[0] = this->joint_position[0];
+
             for (int i = 0; i < n_joints - 1; i++)
             {
                 // homework: compute the position in forward processing
+                Vec3f dir = (backward_positions[i+1] - now_position).normalized();
+                now_position = now_position + joint_offset_len[i] * dir;
+                forward_positions[i+1] = now_position;
             }
 
             // copy forward positions to joint_positions

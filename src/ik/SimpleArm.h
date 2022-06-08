@@ -27,7 +27,7 @@ namespace VCL
                 std::vector<Vec3f> end_position_hist;  // we can render the history of end position as points
                 std::vector<Vec3f> trajectory;
                 int curr_frame = 0;
-                IKType ik_type = IKType::CCD;
+                IKType ik_type = IKType::FABR;
 
             protected:
                 Framebuffer* framebuffer = nullptr;

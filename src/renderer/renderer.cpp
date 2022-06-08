@@ -17,7 +17,7 @@ namespace VCL {
 
         if (this->lab4_mode == Lab4Mode::IK)
         {
-            this->simple_arm = new IK::SimpleArm(this->framebuffer_, this->camera_, IK::IKType::CCD);
+            this->simple_arm = new IK::SimpleArm(this->framebuffer_, this->camera_, IK::IKType::FABR);
         }
         else if (this->lab4_mode == Lab4Mode::MassSpring)
         {
