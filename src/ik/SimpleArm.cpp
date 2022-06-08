@@ -64,6 +64,8 @@ namespace VCL::IK
     void SimpleArm::inverse_kinematics(const Vec3f& end_position)
     {
         // You can choose one of inverse kinematics to implement
+        // this->ccd_ik(end_position, 100, 1e-4);
+        // printf("IKType = %d\n", this->ik_type);
         if (this->ik_type == IKType::CCD)
         {
             this->ccd_ik(end_position, 100, 1e-4);
@@ -76,20 +78,37 @@ namespace VCL::IK
 
     void SimpleArm::ccd_ik(const Vec3f& end_position, int maxCCDIKIteration, float eps)
     {
+        // printf("+1s\n");
+        // system("");
         // Implement CCD IK here
         this->forward_kinematics(0);
         for(int CCDIKIteration = 0; CCDIKIteration < maxCCDIKIteration && (end_effector_pos() - end_position).norm() > eps; CCDIKIteration++)
         {
+            // puts("+1s");
             for (int i = this->num_joints() - 2; i >= 0; i--)
             {
                 // homework: create rotation of i-th joint
                 this->forward_kinematics(i);
+                Vec3f chain_top_point = joint_position[this->num_joints() - 1];
+                Vec3f link_root = joint_position[i];
+                Vec3f root_to_end = (end_position - link_root).normalized();
+                Vec3f root_to_top = (chain_top_point - link_root).normalized();
+
+                // 利用叉积找到法向量作为旋转轴
+                Vec3f rotation_axis = root_to_top.cross(root_to_end);
+                float k = root_to_end.dot(root_to_top) + 1.0f;
+                float s = 1.0 / sqrt(k + k);
+                Quatf result(k * s, s * rotation_axis(0), s * rotation_axis(1), s * rotation_axis(2));
+                // 后施加新的 result 旋转，换序问题要考虑
+                joint_rotation[i] = result * joint_rotation[i];
             }
         }
+        this->forward_kinematics(0);
     }
 
     void SimpleArm::fabr_ik(const Vec3f& end_position, int maxFABRIKIteration, float eps)
     {
+        // printf("+2s\n");
         // Implement fabr ik here
         this->forward_kinematics(0);
         int n_joints = this->num_joints();

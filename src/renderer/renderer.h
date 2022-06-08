@@ -40,7 +40,7 @@ namespace VCL
         int width_ = 800;
         int height_ = 600;
 
-        Lab4Mode lab4_mode = Lab4Mode::MassSpring;
+        Lab4Mode lab4_mode = Lab4Mode::IK;
         IK::SimpleArm * simple_arm = nullptr;
         MassSpring::DynamicSystem * mass_spring = nullptr;
         
