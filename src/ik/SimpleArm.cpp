@@ -91,9 +91,11 @@ namespace VCL::IK
                 this->forward_kinematics(i);
                 Vec3f chain_top_point = joint_position[this->num_joints() - 1];
                 Vec3f link_root = joint_position[i];
-                Vec3f root_to_end = (end_position - link_root).normalized();
-                Vec3f root_to_top = (chain_top_point - link_root).normalized();
+                Vec3f root_to_end = (end_position - link_root);
+                Vec3f root_to_top = (chain_top_point - link_root);
 
+
+            /*  // Simple Rotation 
                 // 利用叉积找到法向量作为旋转轴
                 Vec3f rotation_axis = root_to_top.cross(root_to_end);
                 float k = root_to_end.dot(root_to_top) + 1.0f;
@@ -101,6 +103,22 @@ namespace VCL::IK
                 Quatf result(k * s, s * rotation_axis(0), s * rotation_axis(1), s * rotation_axis(2));
                 // 后施加新的 result 旋转，换序问题要考虑
                 joint_rotation[i] = result * joint_rotation[i];
+            */
+                
+                // More Robust rotation
+                Vec3f w;
+                float norm_root_end = sqrt(root_to_end.dot(root_to_end) * root_to_top.dot(root_to_top));
+                float real_part = norm_root_end + root_to_end.dot(root_to_top);
+                if (real_part < 1.e-6f * norm_root_end){
+                    real_part = 0.0f;
+                    w = abs(root_to_top(0)) > abs(root_to_top(2)) ? Vec3f(-root_to_top(1), root_to_top(0), 0.f)
+                                                                  : Vec3f(0.f, -root_to_top(2), root_to_top(1));
+                }
+                else {
+                    w = root_to_top.cross(root_to_end);
+                }
+                Quatf result(real_part, w(0), w(1), w(2));
+                joint_rotation[i] = result.normalized() * joint_rotation[i];
             }
         }
         this->forward_kinematics(0);
