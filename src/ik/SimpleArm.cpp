@@ -13,9 +13,16 @@ namespace VCL::IK
         this->cube = Model::create_cube();
         // create arm by default offsets.
         joint_offset.emplace_back(Vec3f(1, 1, 1));
-        joint_offset.emplace_back(Vec3f(-0.6f, -0.2f, -0.4f));
-        joint_offset.emplace_back(Vec3f(0.4f, -0.3f, -0.4f));
-        joint_offset.emplace_back(Vec3f(-0.4f, -0.5f, 0.0f));
+        // joint_offset.emplace_back(Vec3f(-0.6f, -0.2f, -0.4f));
+        // joint_offset.emplace_back(Vec3f(0.4f, -0.3f, -0.4f));
+        // joint_offset.emplace_back(Vec3f(-0.4f, -0.5f, 0.0f));
+        // TODO: add new arm here
+        joint_offset.emplace_back(Vec3f(2.0f, 1.0f, 0.7f));
+        joint_offset.emplace_back(Vec3f(2.0f, 1.0f, 0.7f));
+        joint_offset.emplace_back(Vec3f(-0.2f, -0.3f, 0.5f));
+        joint_offset.emplace_back(Vec3f(0.1f, -0.3f, -0.5f));
+        joint_offset.emplace_back(Vec3f(0.1f, -0.3f, -0.5f));
+
         size_t n_joints = this->num_joints();
         for (int i = 0; i < n_joints - 1; i++)
         {
@@ -188,12 +195,69 @@ namespace VCL::IK
     {
         // create a simple circle as end effector trajectory
         // You can modify the trajectory here.
-        const int max_count = 100;
+        
+        // circle
+        const int max_count = 300;
         for (int i = 0; i < max_count; i++)
         {
             float theta = (2 * PI_ * i) / max_count;
             this->trajectory.emplace_back(Vec3f(0.5f + 0.5f * std::cos(theta), 0, 0.5f + 0.5f * std::sin(theta)));
         }
+
+        // CLH logo draw
+        // const int max_count = 1000;
+        // float total_t = PI_ + 8.0;
+        // float delta_t = total_t / max_count;
+        // for (float t=0.0; t < total_t; t += delta_t)
+        // {
+        //     if(t<=PI_)
+        //     {
+        //         this->trajectory.emplace_back(Vec3f(-std::sin(t), 0, 1 + std::cos(t)));
+        //     }
+        //     else if(t>PI_ && t<=PI_+2.0)
+        //     {
+        //         this->trajectory.emplace_back(Vec3f(0, 0, PI_ + 2.0 - t));
+        //     }
+        //     else if(t>PI_+2.0 && t<=PI_+3.0)
+        //     {
+        //         this->trajectory.emplace_back(Vec3f(t - PI_ - 2.0, 0, 0));
+        //     }
+        //     else if(t>PI_+3.0 && t<=PI_+5.0)
+        //     {
+        //         this->trajectory.emplace_back(Vec3f(1, 0, PI_ + 5.0 - t));
+        //     }
+        //     else if(t>PI_+5.0 && t<=PI_+6.0)
+        //     {
+        //         this->trajectory.emplace_back(Vec3f(t - PI_ - 4.0, 0, 1));
+        //     }
+        //     else if(t>PI_ + 6.0)
+        //     {
+        //         this->trajectory.emplace_back(Vec3f(2, 0, PI_ + 8.0 - t));
+        //     }
+        // }
+
+        // Number 2
+        // const int max_count = 500;
+        // float total_t = 5.0;
+        // float delta_t = total_t / max_count;
+        // for (float t=0.0; t < total_t; t += delta_t)
+        // {
+        //     if(t <= 1.0){
+        //         this->trajectory.emplace_back(Vec3f(t, 0, 2));
+        //     }
+        //     else if(t > 1.0 && t <= 2.0){
+        //         this->trajectory.emplace_back(Vec3f(1, 0, 3 - t));
+        //     }
+        //     else if(t > 2.0 && t <= 3.0){
+        //         this->trajectory.emplace_back(Vec3f(3.0 - t, 0, 1));
+        //     }
+        //     else if(t > 3.0 && t <= 4.0){
+        //         this->trajectory.emplace_back(Vec3f(0, 0, 4.0 - t));
+        //     }
+        //     else if(t > 4.0 && t <= 5.0){
+        //         this->trajectory.emplace_back(Vec3f(t - 4.0, 0, 0));
+        //     }
+        // }
     }
 
     void SimpleArm::render()
