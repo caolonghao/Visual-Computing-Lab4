@@ -13,15 +13,15 @@ namespace VCL::IK
         this->cube = Model::create_cube();
         // create arm by default offsets.
         joint_offset.emplace_back(Vec3f(1, 1, 1));
-        // joint_offset.emplace_back(Vec3f(-0.6f, -0.2f, -0.4f));
-        // joint_offset.emplace_back(Vec3f(0.4f, -0.3f, -0.4f));
-        // joint_offset.emplace_back(Vec3f(-0.4f, -0.5f, 0.0f));
+        joint_offset.emplace_back(Vec3f(-0.6f, -0.2f, -0.4f));
+        joint_offset.emplace_back(Vec3f(0.4f, -0.3f, -0.4f));
+        joint_offset.emplace_back(Vec3f(-0.4f, -0.5f, 0.0f));
         // TODO: add new arm here
-        joint_offset.emplace_back(Vec3f(2.0f, 1.0f, 0.7f));
-        joint_offset.emplace_back(Vec3f(2.0f, 1.0f, 0.7f));
-        joint_offset.emplace_back(Vec3f(-0.2f, -0.3f, 0.5f));
-        joint_offset.emplace_back(Vec3f(0.1f, -0.3f, -0.5f));
-        joint_offset.emplace_back(Vec3f(0.1f, -0.3f, -0.5f));
+        // joint_offset.emplace_back(Vec3f(2.0f, 1.0f, 0.7f));
+        // joint_offset.emplace_back(Vec3f(2.0f, 1.0f, 0.7f));
+        // joint_offset.emplace_back(Vec3f(-0.2f, -0.3f, 0.5f));
+        // joint_offset.emplace_back(Vec3f(0.1f, -0.3f, -0.5f));
+        // joint_offset.emplace_back(Vec3f(0.1f, -0.3f, -0.5f));
 
         size_t n_joints = this->num_joints();
         for (int i = 0; i < n_joints - 1; i++)
